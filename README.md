@@ -33,6 +33,16 @@ Four working business-process-automation prototypes from the Solutions101 studio
 
 Each folder has its own README with screenshots and a short walkthrough.
 
+## Screenshots
+
+Captured from the live demo with headless Chrome (more per demo in each folder's `docs/`).
+
+| | |
+|---|---|
+| ![Index page](screens/index.png) | ![Rental fleet occupancy calendar](screens/autopark.png) |
+| ![Warehouse terminal picking screen](screens/warehouse-terminal.png) | ![Counterparty settlements dashboard](screens/accounting.png) |
+| ![Auto-parts store home](screens/auto-parts.png) | |
+
 ## Demo data: all invented
 
 All companies, people, goods, amounts, phone numbers and tax numbers in the demos are invented and generated in the browser. In demo mode nothing is sent anywhere; state lives in your browser's `localStorage`. With the optional backend, data goes only to your own server.
