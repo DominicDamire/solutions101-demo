@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solutions101 — working prototypes</title>
+<meta name="description" content="Solutions101 is a business-process automation studio. Four working prototypes that run in the browser on demo data: equipment rental, warehouse terminal, counterparty settlements, auto-parts store.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23141a1c'/%3E%3Ctext x='16' y='22.5' font-family='monospace' font-size='16' font-weight='700' text-anchor='middle' fill='%23f6e9e2'%3E101%3C/text%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/golos-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/golos-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Tokens and typefaces are the Solutions101 v2 design system (the same faces the demos use):
+   Golos Text for text, JetBrains Mono for labels. Files live in assets/fonts. */
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400 900;font-display:swap;
+  src:url(assets/fonts/golos-cyrillic.woff2) format('woff2');
+  unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:'Golos Text';font-style:normal;font-weight:400 900;font-display:swap;
+  src:url(assets/fonts/golos-latin.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 700;font-display:swap;
+  src:url(assets/fonts/jetbrains-mono.woff2) format('woff2')}
+
+:root{
+  --bg:#f6e9e2; --surface:#efe0d7; --ink:#141a1c;
+  --ink-soft:rgba(20,26,28,.76); --ink-faint:rgba(20,26,28,.66);
+  --rule:rgba(20,26,28,.14); --rule-strong:rgba(20,26,28,.30);
+  --accent:#1f6f93;
+  --display:'Golos Text',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0e202d; --surface:#132937; --ink:#F2F7F5;
+    --ink-soft:rgba(242,247,245,.78); --ink-faint:rgba(242,247,245,.62);
+    --rule:rgba(242,247,245,.13); --rule-strong:rgba(242,247,245,.28);
+    --accent:#7FD8FF;
+  }
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink-soft);
+  font-family:var(--display); font-size:16px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding-inline:clamp(18px,4vw,54px)}
+
+/* ---------- masthead ---------- */
+.top{display:flex; flex-direction:column; gap:26px; padding-block:clamp(40px,7vw,78px) 0}
+.brand{
+  font-family:var(--mono); font-size:12.5px; font-weight:700;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--ink-faint);
+}
+.brand b{color:var(--ink); font-weight:700}
+h1{
+  margin:0; color:var(--ink); font-weight:800;
+  font-size:clamp(31px,5.4vw,58px); line-height:1.06;
+  letter-spacing:-.025em; text-wrap:balance; max-width:22ch;
+}
+.intro{display:flex; flex-direction:column; gap:12px; max-width:68ch}
+.intro p{margin:0}
+.lede{font-size:clamp(16px,1.35vw,18.5px)}
+.lede-en{font-size:15px; color:var(--ink-faint)}
+.nb{white-space:nowrap}
+
+/* ---------- section rule ---------- */
+.sechead{
+  display:flex; align-items:baseline; gap:18px;
+  margin-block:clamp(44px,6vw,72px) 0; padding-bottom:12px;
+  border-bottom:1px solid var(--rule-strong);
+}
+.sechead h2{
+  margin:0; color:var(--ink); font-weight:700;
+  font-size:clamp(19px,2.1vw,25px); letter-spacing:-.015em;
+}
+.sechead h2 small{font-size:.62em; font-weight:500; color:var(--ink-faint); letter-spacing:0; margin-left:.5em}
+.sechead em{
+  font-family:var(--mono); font-style:normal; font-size:11px; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+  margin-left:auto; white-space:nowrap;
+}
+
+/* ---------- the wall: 2 + 3 on a six-column grid ---------- */
+.wall{
+  list-style:none; margin:clamp(24px,3vw,36px) 0 0; padding:0;
+  display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:clamp(18px,2.4vw,28px);
+}
+.card{
+  grid-column:span 3; display:flex; flex-direction:column; min-width:0;
+  background:var(--surface); border:1px solid var(--rule);
+}
+
+.shot{display:block; position:relative; overflow:hidden; background:var(--bg); border-bottom:1px solid var(--rule)}
+.shot img{
+  display:block; width:100%; height:auto; aspect-ratio:16/10;
+  object-fit:cover; object-position:top center; transition:transform .4s ease;
+}
+.shot::after{content:""; position:absolute; inset:auto 0 0 0; height:3px; background:var(--sc)}
+.card:hover .shot img{transform:scale(1.02)}
+
+.meta{display:flex; flex-direction:column; gap:10px; padding:clamp(16px,2vw,22px); flex:1}
+.kind{
+  margin:0; font-family:var(--mono); font-size:10.5px; font-weight:700;
+  letter-spacing:.17em; text-transform:uppercase; color:var(--st);
+}
+.meta h3{
+  margin:0; color:var(--ink); font-weight:800;
+  font-size:clamp(20px,2.2vw,26px); line-height:1.14; letter-spacing:-.02em; text-wrap:balance;
+}
+.desc{margin:0; font-size:15px; text-wrap:pretty}
+.desc-en{margin:0; font-size:13.6px; color:var(--ink-faint); text-wrap:pretty}
+
+.links{display:flex; flex-wrap:wrap; gap:10px; margin:auto 0 0; padding-top:10px}
+.btn{
+  display:inline-flex; align-items:center; gap:9px; min-height:44px;
+  font-family:var(--mono); font-size:12px; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; text-decoration:none;
+  color:var(--ink); border:1px solid var(--rule-strong); padding:0 17px;
+  transition:border-color .18s ease, color .18s ease;
+}
+.btn.quiet{border-color:var(--rule); color:var(--ink-soft)}
+.btn:hover{border-color:var(--st); color:var(--st)}
+.btn:focus-visible,.shot:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.btn i{font-style:normal; transition:transform .18s ease}
+.btn:hover i{transform:translateX(3px)}
+
+/* per-prototype accent: --sc for the stripe (sampled off each capture), --st for text */
+.c-park{--sc:#F3A424; --st:#9A5600}
+.c-sklad{--sc:#D8F60A; --st:#5C6B00}
+.c-vzaim{--sc:#3A63C8; --st:#3A63C8}
+.c-zap{--sc:#E01F26; --st:#C4121F}
+@media (prefers-color-scheme:dark){
+  .c-park{--st:#F3A424} .c-sklad{--st:#D0F000} .c-vzaim{--st:#6F95FF}
+  .c-zap{--st:#FF5A63}
+}
+
+footer{
+  margin-top:clamp(44px,6vw,80px); padding-block:24px clamp(40px,6vw,64px);
+  border-top:1px solid var(--rule-strong); display:flex; flex-direction:column; gap:8px;
+}
+footer p{margin:0; font-size:13.6px; color:var(--ink-faint); max-width:80ch; text-wrap:pretty}
+footer a{color:var(--accent); text-underline-offset:3px; text-decoration-thickness:1px}
+
+/* tablet: two columns */
+@media (max-width:1020px){
+  .wall{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card{grid-column:span 1}
+}
+/* phone: one column */
+@media (max-width:640px){
+  .wall{grid-template-columns:1fr}
+  .sechead{flex-wrap:wrap}
+  .sechead em{margin-left:0; width:100%; order:3}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="brand"><b>Solutions101</b> · автоматизация бизнес-процессов</div>
+  <h1>Solutions101 — working prototypes</h1>
+  <div class="intro">
+    <p class="lede">Solutions101 — студия автоматизации бизнес-процессов. Здесь четыре рабочих прототипов: каждый — отдельное приложение в одном <span class="nb">HTML-файле</span>, без сервера и установки, его можно открыть, понажимать и сломать. Прототипы работают на демо-данных: все компании, товары, суммы и имена в них выдуманы.</p>
+    <p class="lede-en" lang="en">Solutions101 is a business-process automation studio. Below are four working prototypes, each a single HTML file with no backend that you can open and click through. They run on demo data: every company, product, amount and name in them is invented.</p>
+  </div>
+</header>
+
+<main>
+  <div class="sechead">
+    <h2>Прототипы <small lang="en">Prototypes</small></h2>
+    <em lang="en">4 · demo data</em>
+  </div>
+
+  <ul class="wall">
+
+    <li class="card c-park">
+      <a class="shot" href="autopark/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="assets/autopark.png" width="1200" height="750" alt="" fetchpriority="high"></a>
+      <div class="meta">
+        <p class="kind" lang="en">Equipment-rental fleet</p>
+        <h3>Арендный парк</h3>
+        <p class="desc">Календарь занятости, договоры, смены, платежи и доходность каждой машины.</p>
+        <p class="desc-en" lang="en">Occupancy calendar, contracts, shifts, payments and profitability of each machine.</p>
+        <p class="links">
+          <a class="btn" href="autopark/" target="_blank" rel="noopener">Open demo <i aria-hidden="true">→</i></a>
+          <a class="btn quiet" href="https://github.com/DominicDamire/solutions101-demo/tree/main/autopark" target="_blank" rel="noopener">Code <i aria-hidden="true">↗</i></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="card c-sklad">
+      <a class="shot" href="warehouse-terminal/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="assets/warehouse-terminal.png" width="1200" height="750" alt="" fetchpriority="high"></a>
+      <div class="meta">
+        <p class="kind" lang="en">Warehouse scanner (WMS)</p>
+        <h3>Складской терминал</h3>
+        <p class="desc">Экран сборщика и офисный режим: отбор по FEFO, приёмка, размещение, слепая инвентаризация.</p>
+        <p class="desc-en" lang="en">Picker terminal and office view: FEFO picking, receiving, putaway, blind stock count.</p>
+        <p class="links">
+          <a class="btn" href="warehouse-terminal/" target="_blank" rel="noopener">Open demo <i aria-hidden="true">→</i></a>
+          <a class="btn quiet" href="https://github.com/DominicDamire/solutions101-demo/tree/main/warehouse-terminal" target="_blank" rel="noopener">Code <i aria-hidden="true">↗</i></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="card c-vzaim">
+      <a class="shot" href="accounting/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="assets/accounting.png" width="1200" height="750" alt="" loading="lazy"></a>
+      <div class="meta">
+        <p class="kind" lang="en">Counterparty settlements</p>
+        <h3>Взаиморасчёты с контрагентами</h3>
+        <p class="desc">Чистая позиция по каждому контрагенту, возраст долга, платёжный календарь и акт сверки.</p>
+        <p class="desc-en" lang="en">Net position per customer and supplier, debt ageing, payment calendar, printable reconciliation act.</p>
+        <p class="links">
+          <a class="btn" href="accounting/" target="_blank" rel="noopener">Open demo <i aria-hidden="true">→</i></a>
+          <a class="btn quiet" href="https://github.com/DominicDamire/solutions101-demo/tree/main/accounting" target="_blank" rel="noopener">Code <i aria-hidden="true">↗</i></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="card c-zap">
+      <a class="shot" href="auto-parts/" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="assets/auto-parts.png" width="1200" height="750" alt="" loading="lazy"></a>
+      <div class="meta">
+        <p class="kind" lang="en">Auto-parts store</p>
+        <h3>Магазин автозапчастей</h3>
+        <p class="desc">Подбор по VIN или по марке и модели, каталог с фильтрами, карточка детали и заказ через корзину.</p>
+        <p class="desc-en" lang="en">Find parts by VIN or by make and model, filter the catalogue, order through a cart.</p>
+        <p class="links">
+          <a class="btn" href="auto-parts/" target="_blank" rel="noopener">Open demo <i aria-hidden="true">→</i></a>
+          <a class="btn quiet" href="https://github.com/DominicDamire/solutions101-demo/tree/main/auto-parts" target="_blank" rel="noopener">Code <i aria-hidden="true">↗</i></a>
+        </p>
+      </div>
+    </li>
+
+
+  </ul>
+</main>
+
+<footer>
+  <p>Каждый прототип — один HTML-файл без сервера; все данные в них выдуманы. Интерфейс демо&nbsp;— русский.</p>
+  <p lang="en">Each prototype is a single HTML file with no backend; all data in them is invented. The demo interfaces are in Russian.</p>
+  <p lang="en">Damire Zalyatov · <a href="https://github.com/DominicDamire" target="_blank" rel="noopener">github.com/DominicDamire</a> · <a href="https://github.com/DominicDamire/solutions101-demo" target="_blank" rel="noopener">source of this page</a></p>
+</footer>
+
+</div>
+</body>
+</html>
